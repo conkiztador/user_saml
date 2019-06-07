@@ -27,6 +27,7 @@ use OCP\IRequest;
 use OCP\ISession;
 use OCP\IURLGenerator;
 use OneLogin\Saml2\Constants;
+use OneLogin\Saml2\IdPMetadataParser;
 
 class SAMLSettings {
 	/** @var IURLGenerator */
@@ -157,6 +158,14 @@ class SAMLSettings {
 			$settings['sp']['singleLogoutService'] = [
 				'url' => $this->urlGenerator->linkToRouteAbsolute('user_saml.SAML.singleLogoutService'),
 			];
+		}
+
+		$idp_metadata_url = $this->config->getAppValue('user_saml', $prefix . 'idp-metadata.url', '');
+		if ($idp_metadata_url !== '') {
+			$metadata_settings = IdPMetadataParser::parseRemoteXML($idp_metadata_url);
+			if ($metadata_settings != null) {
+				$settings['idp'] = $metadata_settings['idp'];
+			}
 		}
 
 		return $settings;
